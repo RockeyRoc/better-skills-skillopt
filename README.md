@@ -1,95 +1,165 @@
 # Better Skills SkillOpt
 
-一个面向编程型 Agent 使用者的低门槛 skill 优化器。它借鉴 Microsoft
-[SkillOpt](https://github.com/microsoft/SkillOpt) 与 Yang 等人的论文方法，把
-“反思、有限编辑、验证门、可复用文本 artifact”收敛成一个不依赖 Python
-第三方包、无网络、无系统写入的便携项目。
+*A low-friction, local-only optimizer for portable agent skills.*
 
-## 解决的问题
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Standard Library](https://img.shields.io/badge/Dependencies-Python%20standard%20library-green.svg)](https://docs.python.org/3/library/)
+[![Inspired by SkillOpt](https://img.shields.io/badge/Inspired%20by-Microsoft%20SkillOpt-8dbb3c)](https://github.com/microsoft/SkillOpt)
+[![GitHub](https://img.shields.io/badge/Repository-better--skills-181717?logo=github)](https://github.com/RockeyRoc/better-skills)
 
-原始 SkillOpt 更偏研究与基准复现：需要模型后端、数据集、训练配置和执行
-harness。这个项目把部署入口简化为一个 skill：用户把原始 `SKILL.md`、skill
-文件夹或 ZIP 交给当前 agent，agent 根据反馈提出小范围改进，然后用内置脚本
-验证并生成新的 `better-<name>.zip`。
+> Improve an existing SKILL.md from reviewed feedback, validate the candidate, and export a new better-name.zip for Codex, Claude Code, Cursor, Devin, or GitHub Copilot.
 
-语义改进由当前 agent 完成；脚本只负责可审计的原子 patch、格式/安全检查和
-跨 agent 打包。这使它能在 Codex、Claude Code、Cursor、Devin 兼容布局以及
-GitHub Copilot 指令文件之间复用同一个 canonical skill。
+---
 
-## 目录
+## Overview
 
-```text
-better-skills-skillopt/
-├── SKILL.md                         # 可部署的入口 skill
-├── agents/openai.yaml               # Codex UI 元数据
-├── skillopt/portable.py             # 标准库实现
-├── scripts/skillopt_portable.py     # CLI
-├── data/examples.jsonl              # 可复用反馈数据格式示例
-└── references/                      # 方法与安全契约
-```
+Agent skills are often hand-written or rewritten in one large step. Better Skills SkillOpt turns improvement into a small, auditable workflow:
 
-## 快速开始
+~~~text
+source skill + feedback
+        |
+        v
+agent reflection
+        |
+        v
+bounded text patch
+        |
+        v
+local validation gate
+        |
+        v
+portable ZIP package
+~~~
 
-在项目根目录执行：
+The agent performs semantic reflection. The included Python utility stays deliberately narrow: it reads local inputs, applies exact patches, validates the result, summarizes JSONL evidence, and creates the ZIP. It does not call a model provider or execute the candidate skill.
 
-```powershell
+## Why this project exists
+
+Microsoft SkillOpt is a research-oriented optimizer with model backends, benchmarks, training configurations, and datasets. This project packages the deployment-facing idea for coding-agent users who need a simple, portable output artifact.
+
+The design is inspired by Yang et al., [SkillOpt: Executive Strategy for Self-Evolving Agent Skills](https://arxiv.org/abs/2605.23904):
+
+- Treat the skill document as mutable text state.
+- Learn from repeated success and failure evidence.
+- Keep edits bounded and inspectable.
+- Validate a candidate before calling it better.
+- Separate optimizer notes from the deployed skill.
+
+## Features
+
+### Bounded edits
+
+Only append, insert_after, replace, and delete operations are accepted. The default proposal budget is four edits. Protected sections, ambiguous anchors, destructive command patterns, and secret-shaped values are rejected.
+
+### Local validation
+
+The validation gate checks frontmatter, non-empty content, compactness, protected markers, suspicious destructive patterns, and secret-shaped values. A safety failure is a hard stop; passing validation is not a benchmark score.
+
+### Portable packaging
+
+The package command creates an inert ZIP with one canonical skill and target-oriented copies:
+
+~~~text
+better-name/
+|-- SKILL.md
+|-- manifest.json
+|-- README.md
++-- targets/
+    |-- codex/.agents/skills/name/SKILL.md
+    |-- claude/.claude/skills/name/SKILL.md
+    |-- cursor/.cursor/skills/name/SKILL.md
+    |-- devin/.devin/skills/name/SKILL.md
+    +-- copilot/copilot-instructions.md
+~~~
+
+The archive does not install anything or modify an agent directory. Review it first, then copy the appropriate target file manually.
+
+## Supported agent layouts
+
+| Target | Deployment-facing file |
+|---|---|
+| Codex | targets/codex/.agents/skills/name/SKILL.md |
+| Claude Code | targets/claude/.claude/skills/name/SKILL.md |
+| Cursor | targets/cursor/.cursor/skills/name/SKILL.md |
+| Devin | targets/devin/.devin/skills/name/SKILL.md |
+| GitHub Copilot | targets/copilot/copilot-instructions.md |
+
+## Quick start
+
+Requirements: Python 3.10 or newer. No third-party package is required.
+
+~~~powershell
 python scripts/skillopt_portable.py validate path\to\SKILL.md
 python scripts/skillopt_portable.py summarize-feedback data\examples.jsonl
-python scripts/skillopt_portable.py package `
-  --skill path\to\optimized\SKILL.md `
-  --output-dir .\dist
-```
+python scripts/skillopt_portable.py package --skill path\to\candidate\SKILL.md --output-dir .\dist
+~~~
 
-运行标准库测试：
+To apply a reviewed proposal:
 
-```powershell
+~~~powershell
+python scripts/skillopt_portable.py apply-patch --skill path\to\original\SKILL.md --patch path\to\proposal.json --output path\to\candidate\SKILL.md
+~~~
+
+Run tests with:
+
+~~~powershell
 python -m unittest discover -s tests -v
-```
+~~~
 
-输出：
+The result is dist/better-<skill-name>.zip.
 
-```text
-dist/better-<skill-name>.zip
-```
+## Feedback format
 
-ZIP 是惰性的，不包含安装器，不会自动复制到任何 agent 目录。解压后按目标
-选择一个文件：
+Feedback is stored as one JSON object per line with a task, outcome, failure type, observation, and score between 0 and 1.
 
-- `targets/codex/.agents/skills/<name>/SKILL.md`
-- `targets/claude/.claude/skills/<name>/SKILL.md`
-- `targets/cursor/.cursor/skills/<name>/SKILL.md`
-- `targets/devin/.devin/skills/<name>/SKILL.md`
-- `targets/copilot/copilot-instructions.md`
+Use the summarizer to inspect recurring patterns. Do not include passwords, tokens, private prompts, raw tool payloads, or unnecessary local paths.
 
-## 从反馈生成候选
+## Safety boundary
 
-`data/examples.jsonl` 使用一行一个任务的轻量格式。真实使用时建议保留
-`task`、`outcome`、`failure_type`、`observation` 和可比的 `[0,1]` `score`，
-同时删除秘密、私有文本、原始工具 payload 和不必要的路径。
+This project is designed to generate new skill files only.
 
-```powershell
-python scripts/skillopt_portable.py apply-patch `
-  --skill path\to\original\SKILL.md `
-  --patch path\to\proposal.json `
-  --output path\to\candidate\SKILL.md
-```
+- It reads only files explicitly supplied by the user.
+- It never overwrites the original skill.
+- It writes only the selected candidate path and output directory.
+- It does not access the network, install dependencies, or modify system files.
+- It does not copy files into agent directories automatically.
+- It rejects unsafe archive paths and suspicious command or secret patterns.
+- The ZIP is inert and requires manual review before deployment.
 
-patch 仅允许 `append`、`insert_after`、`replace`、`delete` 四种操作，并默认
-最多四个编辑。它会拒绝保护区修改、模糊目标、破坏性系统命令和疑似密钥。
+## Project structure
 
-## 安全与边界
+~~~text
+better-skills-skillopt/
+|-- SKILL.md
+|-- agents/openai.yaml
+|-- data/examples.jsonl
+|-- references/
+|   |-- method.md
+|   +-- portable_contract.md
+|-- scripts/skillopt_portable.py
+|-- skillopt/portable.py
++-- tests/test_portable.py
+~~~
 
-- 只读取用户明确提供的文件；原始 skill 永不覆盖。
-- 只写用户明确指定的候选文件或 ZIP 输出目录。
-- 不启动子进程，不访问网络，不安装依赖，不修改系统文件。
-- 不提供自动 adoption/installer；用户必须人工审核并复制目标文件。
-- 只把验证后的 target-facing `SKILL.md` 放进部署目录；反馈与 optimizer
-  说明不会混入目标 skill。
+SKILL.md is the deployable entry point. The Python package and CLI provide deterministic local operations; references record the method and safety contract.
 
-详细规则见 `references/portable_contract.md`。论文方法摘要见
-`references/method.md`。
+## Method and references
 
-## 参考
+The conservative loop is: review outcomes, propose a small patch, apply it to a copy, validate locally, package the candidate, and retain the original for comparison.
 
-- Yang et al., [SkillOpt: Executive Strategy for Self-Evolving Agent Skills](https://arxiv.org/abs/2605.23904)
-- Microsoft, [SkillOpt](https://github.com/microsoft/SkillOpt)
+This lightweight implementation is a portable deployment layer, not a replacement for the full Microsoft SkillOpt research framework.
+
+- SkillOpt paper: https://arxiv.org/abs/2605.23904
+- Microsoft SkillOpt project: https://github.com/microsoft/SkillOpt
+- Codex skill creator guidance: https://developers.openai.com/codex/skills/
+
+## Citation
+
+~~~bibtex
+@article{yang2026skillopt,
+  title={SkillOpt: Executive strategy for self-evolving agent skills},
+  author={Yang, Yifan and Gong, Ziyang and Huang, Weiquan and Yang, Qihao and Zhou, Ziwei and Huang, Zisu and Li, Yan and Gao, Xuemei and Dai, Qi and Liu, Bei and others},
+  journal={arXiv preprint arXiv:2605.23904},
+  year={2026}
+}
+~~~
