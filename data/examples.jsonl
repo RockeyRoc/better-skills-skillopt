@@ -1,0 +1,5 @@
+# One JSON object per task. Keep real feedback local and redact secrets.
+{"id":"example-001","task":"Transform a short request into a structured implementation plan","outcome":"success","score":1.0,"failure_type":"","observation":"The skill stated assumptions, constraints, and a verification step."}
+{"id":"example-002","task":"Modify a repository file while preserving unrelated changes","outcome":"failure","score":0.0,"failure_type":"scope-drift","observation":"The agent proposed edits outside the requested file; add an explicit scope check before writing."}
+{"id":"example-003","task":"Return a concise JSON result with no extra prose","outcome":"failure","score":0.0,"failure_type":"format","observation":"The response included a markdown fence; make the output contract explicit and verify it before returning."}
+

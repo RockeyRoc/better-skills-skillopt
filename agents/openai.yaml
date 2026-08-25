@@ -1,0 +1,7 @@
+interface:
+  display_name: "Better Skills SkillOpt"
+  short_description: "Optimize and package portable agent skills"
+  default_prompt: "Use $better-skills-skillopt to optimize this skill and package a portable ZIP."
+
+policy:
+  allow_implicit_invocation: true
