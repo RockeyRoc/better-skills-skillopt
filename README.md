@@ -1,5 +1,7 @@
 # Better Skills SkillOpt
 
+[中文版 README](README.zh-CN.md) · [宣传网站](index.html)
+
 *A low-friction, local-only optimizer for portable agent skills.*
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
