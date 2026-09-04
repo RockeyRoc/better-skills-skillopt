@@ -2,7 +2,7 @@
 
 > 版本：v0.1  ·  规划日期：2026-08-28  ·  规划周期：未来 12 个月
 
-[English README](README.md) · [中文版 README](README.zh-CN.md) · [项目宣传页](index.html)
+[English README](README.md) · [中文版 README](README.zh-CN.md) · [项目宣传页](https://rockeyroc.github.io/better-skills-skillopt/)
 
 ## 一、执行摘要
 
