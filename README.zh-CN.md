@@ -1,10 +1,6 @@
 # Better Skills SkillOpt（中文版）
 
-<<<<<<< HEAD
 [English README](README.md) · [未来发展计划书](ROADMAP.zh-CN.md) · [宣传网站](index.html)
-=======
-[English README](README.md)
->>>>>>> 77c5b41c2e27c81d33a69ba2aa6c79716c3461a7
 
 *一个低门槛、本地优先、面向主流 Coding Agent 的 Skill 优化与打包工具。*
 
