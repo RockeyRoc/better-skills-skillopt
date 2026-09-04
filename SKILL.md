@@ -1,5 +1,5 @@
 ---
-name: better-skills-skillopt
+name: better-skills-skillopt-main
 description: Optimize a user-provided agent skill from feedback or examples, then validate and package a portable ZIP for Codex, Claude Code, Cursor, Devin, or GitHub Copilot. Use when the user wants a low-friction SkillOpt-style improvement workflow. Do not use for installing software, editing system files, or changing the original skill in place.
 ---
 
