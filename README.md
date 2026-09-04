@@ -1,6 +1,6 @@
 # Better Skills SkillOpt
 
-[中文版 README](README.zh-CN.md) · [未来发展计划书](ROADMAP.zh-CN.md) · [宣传网站](index.html)
+[中文版 README](README.zh-CN.md) · [未来发展计划书](ROADMAP.zh-CN.md) · [宣传网站](https://rockeyroc.github.io/better-skills-skillopt/)
 
 *A low-friction, local-only optimizer for portable agent skills.*
 

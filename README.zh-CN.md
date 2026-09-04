@@ -1,6 +1,6 @@
 # Better Skills SkillOpt（中文版）
 
-[English README](README.md) · [未来发展计划书](ROADMAP.zh-CN.md) · [宣传网站](index.html)
+[English README](README.md) · [未来发展计划书](ROADMAP.zh-CN.md) · [宣传网站](https://rockeyroc.github.io/better-skills-skillopt/)
 
 *一个低门槛、本地优先、面向主流 Coding Agent 的 Skill 优化与打包工具。*
 
