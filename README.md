@@ -7,7 +7,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Standard Library](https://img.shields.io/badge/Dependencies-Python%20standard%20library-green.svg)](https://docs.python.org/3/library/)
 [![Inspired by SkillOpt](https://img.shields.io/badge/Inspired%20by-Microsoft%20SkillOpt-8dbb3c)](https://github.com/microsoft/SkillOpt)
-[![GitHub](https://img.shields.io/badge/Repository-better--skills-181717?logo=github)](https://github.com/RockeyRoc/better-skills)
+[![GitHub](https://img.shields.io/badge/Repository-better--skills-181717?logo=github)](https://github.com/RockeyRoc/better-skills-skillopt)
 
 > Improve an existing SKILL.md from reviewed feedback, validate the candidate, and export a new better-name.zip for Codex, Claude Code, Cursor, Devin, or GitHub Copilot.
 
